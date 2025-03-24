@@ -1,0 +1,72 @@
+services:
+    app-1:
+        build:
+            context: ./app-1
+            dockerfile: Dockerfile
+        container_name: app-1
+        volumes:
+            - ./app-1:/var/www/app-1
+            - storage:/var/www/app-1/storage
+        env_file:
+            - ./app-1/.env
+        networks:
+            - app-network
+        depends_on:
+            mysql:
+                condition: service_healthy
+        restart: unless-stopped
+
+    app-2:
+        build:
+            context: ./app-2
+            dockerfile: Dockerfile
+        container_name: app-2
+        volumes:
+            - ./app-2:/var/www/app-2
+            - storage:/var/www/app-2/storage
+        env_file:
+            - ./app-2/.env
+        networks:
+            - app-network
+        depends_on:
+            mysql:
+                condition: service_healthy
+        restart: unless-stopped
+
+    nginx:
+        image: nginx:latest
+        container_name: nginx
+        volumes:
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        ports:
+            - "80:80"
+        depends_on:
+            - app-1
+            - app-2
+        networks:
+            - app-network
+        restart: unless-stopped
+
+    mysql:
+        image: mysql:8.0
+        container_name: mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: secret
+        volumes:
+            - mysql_data:/var/lib/mysql
+        networks:
+            - app-network
+        restart: unless-stopped
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+volumes:
+    mysql_data:
+    storage:
+
+networks:
+    app-network:
+        driver: bridge
