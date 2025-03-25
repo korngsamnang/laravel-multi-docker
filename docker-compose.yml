@@ -5,8 +5,8 @@ services:
             dockerfile: Dockerfile
         container_name: app-1
         volumes:
-            - ./app-1:/var/www/app-1
-            - storage:/var/www/app-1/storage
+            - ./app-1:/var/www
+            - app-1-storage:/var/www/storage
         env_file:
             - ./app-1/.env
         networks:
@@ -22,8 +22,8 @@ services:
             dockerfile: Dockerfile
         container_name: app-2
         volumes:
-            - ./app-2:/var/www/app-2
-            - storage:/var/www/app-2/storage
+            - ./app-2:/var/www
+            - app-2-storage:/var/www/storage
         env_file:
             - ./app-2/.env
         networks:
@@ -65,7 +65,8 @@ services:
 
 volumes:
     mysql_data:
-    storage:
+    app-1-storage:
+    app-2-storage:
 
 networks:
     app-network:
